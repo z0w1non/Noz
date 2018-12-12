@@ -21,7 +21,7 @@ string s = d; //"0.5"
 Only include "Noz.hpp" in your header file or source file.
 
 ## Motivation
-The type converting in C++ as described below require developers to write long code.
+The type conversion in C++ as described below require developers to write long code.
 ```
 double d = 1.5;
 int i = static_cast<int>(d);
@@ -67,7 +67,7 @@ A few destructive type castings as described in the following are not used at im
 - `const_cast`
 - `reinterpret_cast`
 
-Noz::generic_cast can be uniformly applied to the type conversion from `std::shared_ptr<T>` to `std::shared_ptr<U>`, and that is resolved with `std::static_pointer_cast<U, T>` or `std::dynamic_pointer_cast<U, T>` as described below.
+`Noz::generic_cast` can be uniformly applied to the type conversion from `std::shared_ptr<T>` to `std::shared_ptr<U>`, and that is resolved with `std::static_pointer_cast<U, T>` or `std::dynamic_pointer_cast<U, T>` as described below.
 ```
 struct base {};
 struct derived : base { int value{1}; };
@@ -75,25 +75,36 @@ std::shared_ptr<base> ptr = std::make_shared<derived>();
 assert(Noz::generic_cast<std::shared_ptr<derived>>(ptr)->value == 1);
 ```
 
-## Implicit conversion
-Noz provides few types Int, Bool, String and so on has an upper camel case naming.
-These types provide the compatibility with the primitive types such as int, bool, etc. or the standard library types such as std::string and std::string_view.
-
-The types provided by Noz is constructible from the primitive types or the types of string representations.
-Noz::Int is constructible from int, and Noz::String is constructible from std::string, std::string_view, const char [N], and const char * .
-
-The types provided by Noz are easily convertible to the other types.
-
+## Implicit convetible type
+Noz provides several implicit convertible types that have upper camel case naming such as `Bool`, `Int`, `String`, etc.. These types are implicitly call `Noz::generic_cast<T>(...)` at the own constructor and `operator T() const` only when these are not explicitly overloaded.
 ```
 Noz::String s1 = "1.5";
 Noz::Double d  = s;
 
-Noz::Int    i  = 1;
-Noz::String s2 = i;
+Noz::String s2 = 1;
 ```
 
+| Primitive type | Alias type | Entity type |
+|---|---|---|
+| bool | Noz::Bool | Noz::let&lt;bool&gt; |
+| char | Noz::Char | Noz::let&lt;char&gt; |
+| signed char | Noz::SignedChar | Noz::let&lt;signed char&gt; |
+| unsigned char | Noz::UnsignedChar | Noz::let&lt;unsigned char&gt; |
+| short | Noz::Short | Noz::let&lt;short&gt; |
+| unsigned short | Noz::UnsignedShort | Noz::let&lt;unsigned short&gt; |
+| int | Noz::Int | Noz::let&lt;int&gt; |
+| unsigned int | Noz::UnsignedInt | Noz::let&lt;unsigned int&gt; |
+| long | Noz::Long | Noz::let&lt;long&gt; |
+| unsigned long | Noz::UnsignedLong | Noz::let&lt;unsigned long&gt; |
+| long long | Noz::LongLong | Noz::let&lt;long long&gt; |
+| unsigned long long | Noz::UnsignedLongLong | Noz::let&lt;unsigned long long&gt; |
+| float | Noz::Float | Noz::let&lt;float&gt; |
+| double | Noz::Double | Noz::let&lt;double&gt; |
+|std::string | Noz::String | Noz::let&lt;Noz::string_tag&lt;char&gt;&gt; |
+|std::wstring | Noz::WString | Noz::let&lt;Noz::string_tag&lt;wchar_t&gt;&gt; |
+
 ## Universal initialization
-You can declare variables of type provided by Noz with `let` as described below.
+Developers be able to declare variables of implicit convertible type with `Noz::let` as described below.
 ```
 Noz::let str   = "foo"; // means String str   = "foo";
 Noz::let value = 1;     // means Int    value = 1;
@@ -101,19 +112,18 @@ Noz::let value = 1;     // means Int    value = 1;
 
 This `let` syntax is implemented by the class template argument deduction (since C++17).
 
-## Stringize
-Using Noz::String as the left-hand-side or right-hand-side operand of `operator +` , you can stringize any types and concatenate them. The constuctor of Noz::String is used to stringize other types.
+## String concatenation
+Using Noz::String as the left-hand-side or right-hand-side operand of `operator +` , you can stringize any types and concatenate them. The constuctor of `Noz::String` can be used to convert other types to the strings.
 ```
 Noz::String a = "foo";
 Noz::String b = a + 1;
 Noz::String c = 1 + a;
-Noz::String d = Noz::String(1);
 ```
 
 ## String behaves like a value type
-Noz::String references a constant string and provides the value semantics like the String type in Java.
-In many cases, you do not need to use the `const` qualifier to the arguments of type Noz::String.
-Noz::String can be used in the same way as premitive types such as int or bool. The copy constructor and the copy assignment operator of Noz::String is executed quickly because it is implemented with copying of a std::shared_ptr.
+`Noz::String` has `std::shared_ptr<const std::string>`, which is the pointer to the **constant** string, and provides the value semantics such as the `String` type in Java.
+In many cases, developers do not need to use the `const` qualifier to the arguments of type `Noz::String`.
+`Noz::String` can be used in the same way as primitive types such as int or bool. The copy constructor and the copy assignment operator of `Noz::String` are executed quickly because it is implemented with the copy assignment operator of the `std::shared_ptr<const std::string>`.
 ```
 void print(Noz::String b) {
     b = "bar";
@@ -123,7 +133,7 @@ void print(Noz::String b) {
 void main() {
     Noz::String a = "foo";
     print(a);
-    std::cout << a << std::endl; // print "foo"
+    std::cout << a << std::endl; // print "foo", not "bar"
 }
 ```
 
