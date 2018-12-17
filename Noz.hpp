@@ -504,9 +504,20 @@ public:
         return ptr->memfun(std::forward<Args>(args) ...); \
     } \
     \
+    /* Override const member function that return value type */ \
+    template<typename ... Args> \
+    auto memfun(Args && ... args) const \
+        ->std::enable_if_t< \
+            std::is_same_v<std::decay_t<decltype(std::declval<const std::basic_string<CharT, Traits, Allocator>>().memfun(std::forward<Args>(args) ...))>, std::basic_string<CharT, Traits, Allocator>>, \
+            let<string_tag<CharT, Traits, Allocator>> \
+        > \
+    { \
+        return ptr->memfun(std::forward<Args>(args) ...); \
+    } \
+    \
     /* Override const member function that return other type */ \
     template<typename ... Args> \
-    auto memfun(Args && ... args) \
+    auto memfun(Args && ... args) const \
         ->std::enable_if_t< \
             !std::is_same_v<std::decay_t<decltype(std::declval<const std::basic_string<CharT, Traits, Allocator>>().memfun(std::forward<Args>(args) ...))>, std::basic_string<CharT, Traits, Allocator>>, \
             decltype(std::declval<const std::basic_string<CharT, Traits, Allocator>>().memfun(std::forward<Args>(args) ...)) \
@@ -562,6 +573,10 @@ public:
         return generic_cast<U>(*ptr);
     }
 
+    operator const std::basic_string<CharT, Traits, Allocator> & () const {
+        return *ptr;
+    }
+
     operator std::basic_string_view<CharT, Traits>() const {
         return std::basic_string_view<CharT, Traits>{*ptr};
     }
@@ -612,7 +627,7 @@ public:
     auto right(size_type length) const
         -> let<string_tag<CharT, Traits, Allocator> >
     {
-        return ptr->substr(length() - length);
+        return ptr->substr(this->length() - length);
     }
 
 private:
@@ -713,8 +728,11 @@ using LongLong = let<long long>;
 using UnsignedLongLong = let<unsigned long long>;
 using Float = let<float>;
 using Double = let<double>;
-using String = let<string_tag<char>>;
-using WString = let<string_tag<wchar_t>>;
+
+template<typename ... T>
+using BasicString = let<string_tag<T ...>>;
+using String = BasicString<char>;
+using WString = BasicString<wchar_t>;
 
 template<
     typename Key,
@@ -777,6 +795,20 @@ auto operator +(const T & a,
     );
 }
 
+template<typename CharT, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
+auto operator ==(const Noz::BasicString<CharT, Traits, Allocator> & a, const std::basic_string<CharT, Traits, Allocator> & b)
+    -> bool
+{
+    return static_cast<const std::basic_string<CharT, Traits, Allocator> &>(a) == b;
+}
+
+template<typename CharT, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
+auto operator ==( const std::basic_string<CharT, Traits, Allocator> & a, const Noz::BasicString<CharT, Traits, Allocator> & b)
+    -> bool
+{
+    return a == static_cast<const std::basic_string<CharT, Traits, Allocator> &>(b);
+}
+
 namespace std {
 
 #define $(type) \
@@ -816,5 +848,8 @@ public:
 };
 
 } // namespace std
+
+#include "input.hpp"
+#include "output.hpp"
 
 #endif //NOZ_HPP

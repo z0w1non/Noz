@@ -44,7 +44,7 @@ std::string s = std::to_string(i);  //since C++11
 Developers required to use difference functions or cast operators such as `static_cast`, `dynamic_cast`, `atoi`, `atof`, `to_string` depending on a source type and a destination type of the type casting, and these are named asymmetrically. However, what should be used for type casting can be deduced from a source type and a destination type at compile-time.
 
 ## Generic cast
-Template function `Noz::generic_cast` can be used to cast a any type to another type.
+Template function `Noz::generic_cast` can be used to cast any type to another type.
 ```
 int         i = Noz::generic_cast<int>("1");
 std::string s = Noz::generic_cast<std::string>(1);
@@ -75,8 +75,8 @@ std::shared_ptr<base> ptr = std::make_shared<derived>();
 assert(Noz::generic_cast<std::shared_ptr<derived>>(ptr)->value == 1);
 ```
 
-## Implicit convetible type
-Noz provides several implicit convertible types that have upper camel case naming such as `Bool`, `Int`, `String`, etc.. These types are implicitly call `Noz::generic_cast<T>(...)` at the own constructor and `operator T() const` only when these are not explicitly overloaded.
+## Implicitly convertible type
+Noz provides several implicitly convertible types that have upper camel case naming such as `Bool`, `Int`, `String`, etc.. These types are implicitly call `Noz::generic_cast<T>(...)` at the own constructor and `operator T() const` only when these are not explicitly overloaded.
 ```
 Noz::String s1 = "1.5";
 Noz::Double d  = s;
@@ -104,7 +104,7 @@ Noz::String s2 = 1;
 |std::wstring | Noz::WString | Noz::let&lt;Noz::string_tag&lt;wchar_t&gt;&gt; |
 
 ## Universal initialization
-Developers be able to declare variables of implicit convertible type with `Noz::let` as described below.
+Developers be able to declare variables of the implicitly convertible type with `Noz::let` as described below.
 ```
 Noz::let str   = "foo"; // means String str   = "foo";
 Noz::let value = 1;     // means Int    value = 1;
@@ -113,7 +113,7 @@ Noz::let value = 1;     // means Int    value = 1;
 This `let` syntax is implemented by the class template argument deduction (since C++17).
 
 ## String concatenation
-Using Noz::String as the left-hand-side or right-hand-side operand of `operator +` , you can stringize any types and concatenate them. The constuctor of `Noz::String` can be used to convert other types to the strings.
+`Noz::String` can be used to convert any types to the string and concatenate them, by using as the left-hand-side or right-hand-side operand of `operator +`. The constructor of `Noz::String` can be used to convert other types to the strings.
 ```
 Noz::String a = "foo";
 Noz::String b = a + 1;

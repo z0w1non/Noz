@@ -2,6 +2,8 @@
 #include <cassert>
 #include <typeinfo>
 
+#define assert_equal(a, b) { assert(a == b); std::cout << #a << " == " << #b << std::endl; }
+
 int main() {
     {
         std::ostringstream out;
@@ -234,5 +236,44 @@ int main() {
         struct derived : base { int value{1}; };
         assert(Noz::generic_cast<std::shared_ptr<derived>>(std::make_shared<derived>())->value == 1);
         std::cout << "Noz::generic_cast<std::shared_ptr<derived>>(std::make_shared<derived>()) is successed." << std::endl;
+    }
+
+    {
+        assert_equal(Noz::String{"0123456789"}.left(3), "012");
+        assert_equal(Noz::String{"0123456789"}.right(3), "789");
+        assert_equal(Noz::String{"0123456789"}.substr(4, 3), "456");
+    }
+
+    {
+        Noz::String s1{"foo"};
+        std::string s2 = s1;
+        assert_equal(s1, s2);
+    }
+
+    {
+        std::string s1{"foo"};
+        Noz::String s2 = s1;
+        assert_equal(s1, s2);
+    }
+
+    {
+        Noz::Input in{"./README.md"};
+        auto c = in.read_char();
+        std::ostringstream out;
+        out << c;
+        assert_equal(out.str(), "#");
+    }
+
+    {
+        Noz::Input in{"./README.md"};
+        auto line = in.read_line();
+        std::ostringstream out;
+        out << line;
+        assert_equal(out.str(), "# Noz");
+    }
+
+    {
+        // Noz::Output out{"./test.txt"};
+        Noz::out < "foo", "bar", "buz";
     }
 }
