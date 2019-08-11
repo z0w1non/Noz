@@ -76,34 +76,30 @@ public:
 #undef $end
 #undef $begin
 
-template<typename T1, typename T2>
-auto lexical_cast(const T2 & t2)
-    -> T1
+template<typename destination_type, typename source_type>
+auto lexical_cast(const source_type & source)
+    -> destination_type
 {
-    T1 t1;
+    destination_type destination;
     try {
         std::ostringstream os{};
-        os << t2;
+        os << source;
         std::istringstream is{os.str()};
-        is >> t1;
+        is >> destination;
         if (!is) {
             throw std::exception();
         }
-    } catch (std::exception & e) {
+    } catch (std::exception &) {
         throw std::bad_cast();
     }
-    return t1;
+    return destination;
 }
-
-template<typename T1, typename T2>
-auto generic_cast(const T2 &)
-    -> T1;
 
 #define $begin(function_name) \
     template<typename T1_, typename T2_> \
     class function_name { \
     private: \
-        template<typename T1, typename T2> \
+        template<typename source_type, typename destination_type> \
         static auto test(void *) \
             -> decltype( \
 //define $begin
@@ -111,7 +107,7 @@ auto generic_cast(const T2 &)
 #define $end(function_name) \
                 , std::true_type{} \
             ); \
-        template<typename T1, typename T2> \
+        template<typename, typename> \
         static auto test(...) \
             -> std::false_type; \
     public: \
@@ -122,39 +118,59 @@ auto generic_cast(const T2 &)
 //define $end
 
     $begin(is_static_castable)
-        static_cast<T2>(std::declval<T1>())
+        static_cast<destination_type>(std::declval<source_type>())
     $end(is_static_castable)
 
     $begin(is_static_pointer_castable)
-        std::static_pointer_cast<typename pointer_traits<T2>::element_type>(std::declval<T1>())
+        std::static_pointer_cast<typename pointer_traits<destination_type>::element_type>(std::declval<source_type>())
     $end(is_static_pointer_castable)
 
     $begin(is_dynamic_castable)
-        dynamic_cast<T2>(std::declval<T1>())
+        dynamic_cast<destination_type>(std::declval<source_type>())
     $end(is_dynamic_castable)
 
     $begin(is_dynamic_pointer_castable)
-        std::dynamic_pointer_cast<typename pointer_traits<T2>::element_type>(std::declval<T1>())
+        std::dynamic_pointer_cast<typename pointer_traits<destination_type>::element_type>(std::declval<source_type>())
     $end(is_dynamic_pointer_castable)
 
     $begin(is_const_castable)
-        const_cast<T2>(std::declval<T1>())
+        const_cast<destination_type>(std::declval<source_type>())
     $end(is_const_castable)
 
     $begin(is_constructor_castable)
-        T2(std::declval<T1>())
+        destination_type(std::declval<source_type>())
     $end(is_constructor_castable)
 
     $begin(is_lexical_castable)
-        lexical_cast<T2>(std::declval<T1>())
+        lexical_cast<destination_type>(std::declval<source_type>())
     $end(is_lexical_castable)
 
     $begin(is_generic_castable)
-        generic_cast<T2>(std::declval<T1>())
+        generic_cast<destination_type>(std::declval<source_type>())
     $end(is_generic_castable)
 
 #undef $end
 #undef $begin
+
+template<typename destination_type, typename source_type>
+auto test_generic_cast(const source_type &)
+	-> std::string
+{
+	if (is_static_castable_v<source_type, destination_type>)
+		return "static_cast";
+	else if (is_static_pointer_castable_v<source_type, destination_type>)
+		return "static_pointer_cast";
+	else if (is_dynamic_castable_v<source_type, destination_type>)
+		return "dynamic_pointer_cast";
+	else if (is_dynamic_pointer_castable_v<source_type, destination_type>)
+		return "dynamic_pointer_cast";
+	else if (is_constructor_castable_v<source_type, destination_type>)
+		return "constructor_cast";
+	else if (is_lexical_castable_v<source_type, destination_type>)
+		return "lexical_cast";
+	else
+		return "uncanstable";
+}
 
 #define DEFINE_META_FUNCTION_HAS_MEMBER_TYPE(member_type, function_name) \
     template<typename T> \
@@ -191,24 +207,24 @@ auto generic_cast(const T2 &)
 template<typename CharT, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
 class string_tag {};
 
-#define $if(cond, name) \
-    template<typename From, typename To> \
-    auto name(const From & from) \
+#define $if(pred, name) \
+    template<typename source_type, typename destination_type> \
+    auto name(const source_type & source) \
         -> std::enable_if_t< \
-            cond ## _v<From, To>, \
-            To \
+            pred ## _v<source_type, destination_type>, \
+            destination_type \
         > \
     { \
         return \
 //define $if
 
-#define $else(cond, name) \
+#define $else(pred, name) \
     } \
-    template<typename From, typename To> \
-    auto name(const From & from) \
+    template<typename source_type, typename destination_type> \
+    auto name(const source_type & source) \
         -> std::enable_if_t< \
-            !cond ## _v<From, To>, \
-            To \
+            !pred ## _v<source_type, destination_type>, \
+            destination_type \
          > \
     { \
         return \
@@ -218,55 +234,92 @@ class string_tag {};
     } \
 //define  endif
 
-    $if(is_lexical_castable, try_lexical_cast)
-        lexical_cast<To, From>(from);
-    $else(is_lexical_castable, try_lexical_cast)
+    $if (is_lexical_castable, try_lexical_cast)
+        lexical_cast<destination_type>(source);
+    $else (is_lexical_castable, try_lexical_cast)
         std::enable_if_t<false>;
     $endif
 
-    $if(is_constructor_castable, try_constructor_cast)
+    $if (is_constructor_castable, try_constructor_cast)
         To(from);
-    $else(is_constructor_castable, try_constructor_cast)
-        try_lexical_cast<From, To>(from);
+    $else (is_constructor_castable, try_constructor_cast)
+        try_lexical_cast<source_type, destination_type>(source);
     $endif
 
     $if(is_dynamic_pointer_castable, try_dynamic_pointer_cast)
-        std::dynamic_pointer_cast<typename pointer_traits<To>::element_type>(from);
-    $else(is_dynamic_pointer_castable, try_dynamic_pointer_cast)
-        try_constructor_cast<From, To>(from);
+        std::dynamic_pointer_cast<typename pointer_traits<destination_type>::element_type>(source);
+    $else (is_dynamic_pointer_castable, try_dynamic_pointer_cast)
+        try_constructor_cast<source_type, destination_type>(source);
     $endif
 
-    $if(is_dynamic_castable, try_dynamic_cast)
-        dynamic_cast<To>(from);
-    $else(is_dynamic_castable, try_dynamic_cast)
-        try_dynamic_pointer_cast<From, To>(from);
+    $if (is_dynamic_castable, try_dynamic_cast)
+        dynamic_cast<destination_type>(source);
+    $else (is_dynamic_castable, try_dynamic_cast)
+        try_dynamic_pointer_cast<source_type, destination_type>(source);
     $endif
 
-    $if(is_static_pointer_castable, try_static_pointer_cast)
-        std::static_pointer_cast<typename pointer_traits<To>::element_type>(from);
-    $else(is_static_pointer_castable, try_static_pointer_cast)
-        try_dynamic_cast<From, To>(from);
+    $if (is_static_pointer_castable, try_static_pointer_cast)
+        std::static_pointer_cast<typename pointer_traits<destination_type>::element_type>(source);
+    $else (is_static_pointer_castable, try_static_pointer_cast)
+        try_dynamic_cast<source_type, destination_type>(source);
     $endif
 
-    $if(is_static_castable, try_static_cast)
-        static_cast<To>(from);
-    $else(is_static_castable, try_static_cast)
-        try_static_pointer_cast<From, To>(from);
+    $if (is_static_castable, try_static_cast)
+        static_cast<destination_type>(source);
+    $else (is_static_castable, try_static_cast)
+        try_static_pointer_cast<source_type, destination_type>(source);
     $endif
 
 #undef $if
 #undef $else
 #undef $endif
 
-template<typename To, typename From>
-auto generic_cast(const From & from)
-    -> To
+template<typename destination_type, typename source_type>
+auto generic_cast(const source_type & source)
+    -> destination_type
 {
-    return try_static_cast<From, To>(from);
+    return try_static_cast<source_type, destination_type>(source);
 }
 
 template<typename T>
 class let;
+
+// implementation primitive_type
+template<typename primitive_type>
+struct primitive_type_impl {
+	using type = primitive_type;
+};
+template<typename primitive_type>
+struct primitive_type_impl<let<primitive_type>> {
+	using type = typename primitive_type_impl<primitive_type>::type;
+};
+template<typename CharT, typename Traits, typename Allocator>
+struct primitive_type_impl<let<string_tag<CharT, Traits, Allocator>>> {
+	using type = std::basic_string<CharT, Traits, Allocator>;
+};
+template<typename type>
+using primitive_type_t = typename primitive_type_impl<type>::type;
+template<typename type>
+static constexpr auto primitive_type_v = primitive_type<type>::value;
+
+// implementation primitive_value
+template<typename primitive_type>
+struct get_primitive_value_impl {
+	static const primitive_type & get(const primitive_type & value) { return value; }
+	static       primitive_type & get(      primitive_type & value) { return value; }
+};
+template<typename primitive_type>
+struct get_primitive_value_impl<let<primitive_type>> {
+	static const primitive_type & get(const let<primitive_type> & instance) { return instance.value; }
+	static       primitive_type & get(      let<primitive_type> & instance) { return instance.value; }
+};
+template<typename CharT, typename Traits, typename Allocator>
+struct get_primitive_value_impl<let<string_tag<CharT, Traits, Allocator>>> {
+	static const std::basic_string<CharT, Traits, Allocator> & get(const let<string_tag<CharT, Traits, Allocator>> & instance) { return instance.value; }
+	static       std::basic_string<CharT, Traits, Allocator> & get(      let<string_tag<CharT, Traits, Allocator>> & instance) { return instance.value; }
+};
+template<typename type>
+auto get_primitive_value(type && value) { return get_primitive_value_impl<primitive_type_t<std::decay_t<type>>>::get(value); }
 
 template<typename CharT, typename Traits, typename Allocator>
 class let<string_tag<CharT, Traits, Allocator>>;
@@ -274,6 +327,7 @@ class let<string_tag<CharT, Traits, Allocator>>;
 template<typename T>
 class let {
     friend std::hash<let<T>>;
+	friend get_primitive_value_impl<let<T>>;
 
     template<typename U>
     friend auto swap(let<U> &, U &) noexcept -> void;
@@ -402,7 +456,7 @@ $(--)
 
     template<typename U>
     operator U() const {
-        return generic_cast<U>(value);
+        return generic_cast<primitive_type_t<U>>(value);
     }
 
 private:
@@ -430,8 +484,9 @@ auto swap(T & a, T & b) noexcept
     std::swap(a, b);
 }
 
-template<typename CharT, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT> >
+template<typename CharT, typename Traits, typename Allocator>
 class let<string_tag<CharT, Traits, Allocator>> {
+	friend get_primitive_value_impl<let<string_tag<CharT, Traits, Allocator>>>;
 
 #define $(op) \
     template<typename CharT_, typename Traits_, typename Allocator_> \
@@ -457,7 +512,7 @@ template<typename CharT_, typename Traits_, typename Allocator_>
 friend auto operator >>(std::basic_istream<CharT_, Traits_> & istream, let<string_tag<CharT_, Traits_, Allocator_> > & string)
     -> std::basic_istream<CharT_, Traits_> &;
 
-friend class std::hash<let<string_tag<CharT, Traits, Allocator> > >;
+friend struct std::hash<let<string_tag<CharT, Traits, Allocator> > >;
 
 public:
     template<typename ... Args>
@@ -678,41 +733,14 @@ std::basic_istream<CharT, Traits> & operator >>(std::basic_istream<CharT, Traits
     return istream >> *string.ptr;
 }
 
-template<typename T>
-class var_traits {
-public:
-    using primitive_type = T;
-    using type = let<T>;
-    static       type & get_premitive(      type & instance) { return instance; }
-    static const type & get_premitive(const type & instance) { return instance; }
-};
-
-template<typename T>
-class var_traits<let<T> > {
-public:
-    using primitive_type = typename var_traits<T>::primitive_type;
-    using type = let<primitive_type>;
-    static       type & get_premitive(      type & instance) { return instance.value; }
-    static const type & get_premitive(const type & instance) { return instance.value; }
-};
-
-template<typename CharT, typename Traits, typename Allocator>
-class var_traits<let<string_tag<CharT, Traits, Allocator> > > {
-public:
-    using primitive_type = std::basic_string<CharT, Traits, Allocator>;
-    using type = let<string_tag<CharT, Traits, Allocator>>;
-    static       type & get_premitive(      type & instance) { return *instance.ptr; }
-    static const type & get_premitive(const type & instance) { return *instance.ptr; }
-};
-
 template<typename CharT>
 let(const CharT *) -> let<string_tag<CharT>>;
 
-template<typename CharT, typename Size, Size N>
-let(const CharT [N]) -> let<string_tag<CharT>>;
+template<typename CharT, std::size_t n>
+let(const CharT [n]) -> let<string_tag<CharT>>;
 
-template<typename T>
-let(T &&)->let<typename var_traits<typename std::decay_t<T&&> >::primitive_type>;
+template<typename type>
+let(type &&)->let<primitive_type_t<std::decay_t<type &&>>>;
 
 using Bool = let<bool>;
 using Char = let<char>;
@@ -757,7 +785,8 @@ template<typename CharT, typename Traits = std::char_traits<CharT>, typename T>
 auto operator <<(std::basic_ostream<CharT, Traits> & os, const Noz::let<T> & v)
     -> std::basic_ostream<CharT, Traits> &
 {
-    return os << static_cast<std::basic_string<CharT, Traits> >(v);
+	auto string = Noz::generic_cast<std::basic_string<CharT, Traits>>(Noz::get_primitive_value(v));
+    return os << string;
 }
 
 template<typename CharT, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT> >
@@ -803,7 +832,7 @@ auto operator ==(const Noz::BasicString<CharT, Traits, Allocator> & a, const std
 }
 
 template<typename CharT, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
-auto operator ==( const std::basic_string<CharT, Traits, Allocator> & a, const Noz::BasicString<CharT, Traits, Allocator> & b)
+auto operator ==(const std::basic_string<CharT, Traits, Allocator> & a, const Noz::BasicString<CharT, Traits, Allocator> & b)
     -> bool
 {
     return a == static_cast<const std::basic_string<CharT, Traits, Allocator> &>(b);
@@ -849,7 +878,9 @@ public:
 
 } // namespace std
 
-//#include "input.hpp"
-//#include "output.hpp"
+#include "input.hpp"
+#include "output.hpp"
+#include "nil.hpp"
+#include "def.hpp"
 
 #endif //NOZ_HPP

@@ -1,52 +1,101 @@
-#include "Noz.hpp"
 #include <cassert>
 #include <typeinfo>
+#include <optional>
+#include "Noz.hpp"
+#include "def.hpp"
 
 #define assert_equal(a, b) { assert(a == b); std::cout << #a << " == " << #b << std::endl; }
 
 int main() {
+	use Noz;
+	{
+		int * ptr = nil;
+		assert(ptr == nullptr);
+
+		std::optional<int> opt = nil;
+		assert(!opt.has_value());
+		assert(opt == std::nullopt);
+	}
+
+	{
+		static_assert(std::is_same_v<primitive_type_t<let<int>>, int>, "");
+		static_assert(std::is_same_v<primitive_type_t<let<let<int>>>, int>, "");
+		static_assert(std::is_same_v<primitive_type_t<let<let<let<int>>>>, int>, "");
+	}
+
+	{
+		#define assert_size_equivalence(type) static_assert(sizeof(type) == sizeof(let<type>), "");
+			assert_size_equivalence(bool);
+			assert_size_equivalence(char);
+			assert_size_equivalence(short);
+			assert_size_equivalence(int);
+			assert_size_equivalence(long);
+			assert_size_equivalence(long long);
+			assert_size_equivalence(float);
+			assert_size_equivalence(double);
+			assert_size_equivalence(std::string);
+			assert_size_equivalence(std::wstring);
+		#undef assert_size_equivalence
+	}
+
     {
         std::ostringstream out;
-        Noz::let s = "abc";
+        let s = "abc";
         out << s;
         assert(out.str() == "abc");
     }
 
+	{
+		let i = 1;
+		assert(test_generic_cast<bool       >(i) == "static_cast" );
+		assert(test_generic_cast<char       >(i) == "static_cast" );
+		assert(test_generic_cast<short      >(i) == "static_cast" );
+		assert(test_generic_cast<float      >(i) == "static_cast" );
+		assert(test_generic_cast<double     >(i) == "static_cast" );
+		assert(test_generic_cast<std::string>(i) == "lexical_cast");
+	}
+
     {
         std::ostringstream out;
-        Noz::let i = 1;
+        let i = 1;
         out << i;
         assert(out.str() == "1");
     }
 
     {
-        Noz::Int i = 0;
+        Int i = 0;
         assert(!i);
     }
 
     {
-        Noz::Int i = 1;
+        Int i = 1;
         assert(i);
     }
 
     {
-        Noz::String s = "1.5";
-        assert(Noz::generic_cast<double>(s) == 1.5);
+        String s = "1.5";
+        assert(generic_cast<double>(s) == 1.5);
     }
 
+	{
+		//let i = 1000;
+		//let s = i;
+		//assert(s == "1000");
+	}
+
     {
-        Noz::Int i = 1000;
-        Noz::String s = i;
-        assert(s == "1000");
+        //Int i = 1000;
+        //String s = i;
+        //assert(s == "1000");
     }
 
     #define $(arithmetic_type) \
         { \
-            Noz::let value = static_cast<arithmetic_type>(0); \
+            let value = static_cast<arithmetic_type>(0); \
             { \
-                using is_same = std::is_same<decltype(value), Noz::let<arithmetic_type> >; \
+                using is_same = std::is_same<decltype(value), let<arithmetic_type> >; \
                 assert(is_same::value); \
-                std::cout <<  "Noz::let<" << #arithmetic_type << "> is constuctible from static_cast<" << #arithmetic_type << ">(0)" << "." << std::endl; \
+                std::cout <<  "let<" << #arithmetic_type << "> is constuctible from static_cast<" << #arithmetic_type << ">(0)" << "." << std::endl; \
             } \
         } \
     //define $
@@ -64,11 +113,11 @@ int main() {
 
     #define $(arithmetic_type, alias_type) \
         { \
-            Noz::let<arithmetic_type> value{0};\
+            let<arithmetic_type> value{0};\
             { \
-                constexpr auto is_same = std::is_same_v<decltype(value), Noz::alias_type>; \
+                constexpr auto is_same = std::is_same_v<decltype(value), alias_type>; \
                 assert(is_same); \
-                std::cout <<  "Noz::let<" << #arithmetic_type << "> is same to Noz::" << #alias_type << "." << std::endl; \
+                std::cout <<  "let<" << #arithmetic_type << "> is same to " << #alias_type << "." << std::endl; \
             } \
         } \
     //define $
@@ -103,8 +152,8 @@ int main() {
     #define $(T, U) \
         { \
             U u{}; \
-            Noz::let<T> value{u}; \
-            std::cout << "Noz::let<" << #T << "> is constructible from " << #U << "." << std::endl; \
+            let<T> value{u}; \
+            std::cout << "let<" << #T << "> is constructible from " << #U << "." << std::endl; \
         } \
 
         $(char, bool)
@@ -164,8 +213,8 @@ int main() {
     #define $(T) \
         { \
             T instance{}; \
-            Noz::let<T> value = "1"; \
-            std::cout << "Noz::let<" << #T << "> is constructible from Noz::String." << std::endl; \
+            let<T> value = "1"; \
+            std::cout << "let<" << #T << "> is constructible from String." << std::endl; \
         } \
     //define $
     #undef $
@@ -173,10 +222,10 @@ int main() {
     #define $(T, U) \
         { \
             U u{}; \
-            auto t = Noz::generic_cast<T, U>(u); \
+            auto t = generic_cast<T, U>(u); \
             constexpr auto is_same = std::is_same_v<decltype(t), T>; \
             assert(is_same); \
-            std::cout << "Noz::generic_cast<" << #T << ", " << #U << ">(" << #U << ") is successed." << std::endl; \
+            std::cout << "generic_cast<" << #T << ", " << #U << ">(" << #U << ") is successed." << std::endl; \
         } \
     //define $
         $(std::string, bool)
@@ -199,27 +248,27 @@ int main() {
         { \
             T t{0}; \
             U u{1}; \
-            Noz::swap(t, u); \
+            swap(t, u); \
             assert(t == 1); \
             assert(u == 0); \
-            std::cout << "Noz::swap(" << #T << ", " << #U << ") is successed." << std::endl; \
+            std::cout << "swap(" << #T << ", " << #U << ") is successed." << std::endl; \
         \
-            Noz::swap(u, t); \
+            swap(u, t); \
             assert(t == 0); \
             assert(u == 1); \
-            std::cout << "Noz::swap(" << #U << ", " << #T << ") is successed." << std::endl; \
+            std::cout << "swap(" << #U << ", " << #T << ") is successed." << std::endl; \
         } \
     //define $
-        $(bool, Noz::let<bool>)
-        $(char, Noz::let<char>)
-        $(signed char, Noz::let<signed char>)
-        $(unsigned char, Noz::let<unsigned char>)
-        $(int, Noz::let<int>)
-        $(unsigned int, Noz::let<unsigned int>)
-        $(long, Noz::let<long>)
-        $(unsigned long, Noz::let<unsigned long>)
-        $(long long, Noz::let<long long>)
-        $(unsigned long long, Noz::let<unsigned long long>)
+        //$(bool, let<bool>)
+        //$(char, let<char>)
+        //$(signed char, let<signed char>)
+        //$(unsigned char, let<unsigned char>)
+        //$(int, let<int>)
+        //$(unsigned int, let<unsigned int>)
+        //$(long, let<long>)
+        //$(unsigned long, let<unsigned long>)
+        //$(long long, let<long long>)
+        //$(unsigned long long, let<unsigned long long>)
     #undef $
 
     {
@@ -234,30 +283,30 @@ int main() {
     {
         struct base {};
         struct derived : base { int value{1}; };
-        assert(Noz::generic_cast<std::shared_ptr<derived>>(std::make_shared<derived>())->value == 1);
-        std::cout << "Noz::generic_cast<std::shared_ptr<derived>>(std::make_shared<derived>()) is successed." << std::endl;
+        assert(generic_cast<std::shared_ptr<derived>>(std::make_shared<derived>())->value == 1);
+        std::cout << "generic_cast<std::shared_ptr<derived>>(std::make_shared<derived>()) is successed." << std::endl;
     }
 
     {
-        assert_equal(Noz::String{"0123456789"}.left(3), "012");
-        assert_equal(Noz::String{"0123456789"}.right(3), "789");
-        assert_equal(Noz::String{"0123456789"}.substr(4, 3), "456");
+        assert_equal(String{"0123456789"}.left(3), "012");
+        assert_equal(String{"0123456789"}.right(3), "789");
+        assert_equal(String{"0123456789"}.substr(4, 3), "456");
     }
 
     {
-        Noz::String s1{"foo"};
+        String s1{"foo"};
         std::string s2 = s1;
         assert_equal(s1, s2);
     }
 
     {
         std::string s1{"foo"};
-        Noz::String s2 = s1;
+        String s2 = s1;
         assert_equal(s1, s2);
     }
 
     {
-        Noz::Input in{"./README.md"};
+        Input in{"./README.md"};
         auto c = in.read_char();
         std::ostringstream out;
         out << c;
@@ -265,7 +314,7 @@ int main() {
     }
 
     {
-        Noz::Input in{"./README.md"};
+        Input in{"./README.md"};
         auto line = in.read_line();
         std::ostringstream out;
         out << line;
@@ -273,7 +322,7 @@ int main() {
     }
 
     {
-        // Noz::Output out{"./test.txt"};
-        Noz::out < "foo", "bar", "buz";
+        // Output out{"./test.txt"};
+        out < "foo", "bar", "buz";
     }
 }
