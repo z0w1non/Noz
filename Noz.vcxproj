@@ -106,8 +106,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assert.hpp" />
     <ClInclude Include="def.hpp" />
     <ClInclude Include="input.hpp" />
+    <ClInclude Include="is_constexpr.hpp" />
     <ClInclude Include="nil.hpp" />
     <ClInclude Include="Noz.hpp" />
     <ClInclude Include="output.hpp" />

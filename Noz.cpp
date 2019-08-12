@@ -1,4 +1,3 @@
-#include <cassert>
 #include <typeinfo>
 #include <optional>
 #include "Noz.hpp"
@@ -9,7 +8,7 @@
 int main() {
 	use Noz;
 	{
-		int * ptr = nil;
+		int* ptr = nil;
 		assert(ptr == nullptr);
 
 		std::optional<int> opt = nil;
@@ -18,9 +17,23 @@ int main() {
 	}
 
 	{
-		static_assert(std::is_same_v<primitive_type_t<let<int>>, int>, "");
-		static_assert(std::is_same_v<primitive_type_t<let<let<int>>>, int>, "");
-		static_assert(std::is_same_v<primitive_type_t<let<let<let<int>>>>, int>, "");
+		int a = 0, b = 0;
+		assert(a + b);
+	}
+
+	{
+		constexpr auto i = 0;
+		assert(i); // runtime assertion
+	}
+
+	{
+		assert(std::is_same_v<primitive_type_t<let<int>>, int>, "");
+		assert(std::is_same_v<primitive_type_t<let<let<int>>>, int>, "");
+		assert(std::is_same_v<primitive_type_t<let<let<let<int>>>>, int>, "");
+	}
+
+	{
+		assert(true);
 	}
 
 	{

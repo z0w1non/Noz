@@ -38,5 +38,11 @@
     <ClInclude Include="def.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="assert.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="is_constexpr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
