@@ -36,25 +36,18 @@ public:
         get_ostream() << c;
     }
 
-    auto write_line()
+    auto puts()
         -> void
     {
         get_ostream() << std::endl;
     }
 
     template<typename ... string_types>
-    auto write_line(string_types ... strings)
+    auto puts(string_types ... strings)
         -> void
     {
         write(std::forward<string_types>(strings) ...);
-        write_line();
-    }
-
-    template<typename char_type>
-    auto write_line(const char_type * ptr, std::size_t length)
-        -> void
-    {
-        write_line(ptr, length);
+        puts();
     }
 
     template<typename input_type>
@@ -87,7 +80,7 @@ public:
     template<typename ... argment_types>
     int printf(const CharT * format, argment_types && ... argments) {
         int length;
-        std::size_t buffer_size = Traits::length(format) + sizeof ... (argments) * 256;
+        std::size_t buffer_size = Traits::length(format) + sizeof ... (argments) * 256 + 1;
         while (true) {
             std::unique_ptr<CharT[]> buffer = std::unique_ptr<CharT[]>(new CharT[buffer_size]);
             length = snprintf<CharT>{}(buffer.get(), buffer_size, format, std::forward<argment_types>(argments) ...);
@@ -119,7 +112,7 @@ public:
 
         ~temporary_base_output() {
             if (has_ownership) {
-                base_output_instance.write_line();
+                base_output_instance.puts();
             }
         }
 
@@ -165,6 +158,9 @@ private:
 template<typename ...>
 class ostream_tag;
 
+struct as_reference_tag {};
+struct as_value_tag {};
+
 template<
     typename CharT,
     typename Traits
@@ -175,12 +171,30 @@ class let<ostream_tag<CharT, Traits>>
     friend class base_output<let<ostream_tag<CharT, Traits>>, CharT, Traits>;
 
 public:
-    template<typename ostream_type>
+    template<typename ostream_type, typename enable_if = std::enable_if_t<!is_let_type_v<ostream_type>>>
     let(ostream_type && ostream)
-        : ostream_holder{new ostream_holder_impl<ostream_type>>(std::forward<ostream_type>(ostream))}
+        : ostream_holder{std::make_shared<ostream_holder_impl<std::decay_t<ostream_type>, as_value_tag>>(std::forward<ostream_type>(ostream))}
     {}
 
+    template<typename ostream_type, typename enable_if = std::enable_if_t<!is_let_type_v<ostream_type>>>
+    let(ostream_type && ostream, as_reference_tag)
+        : ostream_holder{std::make_shared<ostream_holder_impl<std::decay_t<ostream_type>, as_reference_tag>>(std::forward<ostream_type>(ostream))}
+    {
+    }
+
+    let(let &) = default;
+    let(let &&) = default;
+
+    auto operator =(let &) -> let & = default;
+    auto operator =(let &&) -> let & = default;
+
+    //template<typename destination_type>
+    //operator destination_type() const {
+    //    return generic_cast<destination_type>(* this);
+    //}
+
 private:
+
     struct ostream_holder_interface {
     public:
         virtual ~ostream_holder_interface() {}
@@ -191,22 +205,27 @@ private:
     struct ostream_holder_impl;
 
     template<typename ostream_type>
-    struct ostream_holder_impl<ostream_type &> {
+    struct ostream_holder_impl<ostream_type, as_reference_tag>
+        : ostream_holder_interface
+    {
         ostream_holder_impl(ostream_type & ostream) : ostream{ostream} {}
         virtual ~ostream_holder_impl() {}
-        virtual auto get() -> std::basic_ostream<CharT, Traits> & { return ostream; }
+        virtual auto get() -> std::basic_ostream<CharT, Traits> & override { return ostream; }
         ostream_type & ostream;
     };
 
     template<typename ostream_type>
-    struct ostream_holder_impl<ostream_type &&> {
-        ostream_holder_impl(ostream_type && ostream) : ostream{std::move<ostream>} {}
+    struct ostream_holder_impl<ostream_type, as_value_tag>
+        : ostream_holder_interface
+    {
+        template<typename ostream_type>
+        ostream_holder_impl(ostream_type && ostream) : ostream{std::forward<ostream_type>(ostream)} {}
         virtual ~ostream_holder_impl() {}
-        virtual auto get() -> std::basic_ostream<CharT, Traits> & { return ostream; }
+        virtual auto get() -> std::basic_ostream<CharT, Traits> & override { return ostream; }
         ostream_type ostream;
     };
 
-    std::unique_ptr<ostream_holder_interface> ostream_holder;
+    std::shared_ptr<ostream_holder_interface> ostream_holder;
 
     auto get_ostream()
         -> std::basic_ostream<CharT, Traits> &
@@ -227,17 +246,25 @@ using Output = basic_ostream<char>;
 using WOutput = basic_ostream<wchar_t>;
 
 template<typename CharT, typename Traits = std::char_traits<CharT>>
-let(std::basic_ostream<CharT, Traits> &)
+let(std::basic_ostream<CharT, Traits> &, as_reference_tag)
     ->let<ostream_tag<CharT, Traits>>;
 
 template<typename CharT, typename Traits = std::char_traits<CharT>>
 let(std::basic_ofstream<CharT, Traits> &&)
     ->let<ostream_tag<CharT, Traits>>;
 
-let cout{std::cout};
-//let wcout{std::wcout};
-//let cerr{std::cerr};
-//let wcerr{std::wcerr};
+template<typename CharT, typename Traits = std::char_traits<CharT>>
+let(const let<ostream_tag<CharT, Traits>> &)
+->let<ostream_tag<CharT, Traits>>;
+
+template<typename CharT, typename Traits = std::char_traits<CharT>>
+let(let<ostream_tag<CharT, Traits>> &&)
+->let<ostream_tag<CharT, Traits>>;
+
+let cout {std::cout,  as_reference_tag{}};
+let wcout{std::wcout, as_reference_tag{}};
+let cerr {std::cerr,  as_reference_tag{}};
+let wcerr{std::wcerr, as_reference_tag{}};
 
 } // namespace Noz
 
