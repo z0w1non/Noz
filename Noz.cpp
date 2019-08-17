@@ -37,7 +37,7 @@ int main() {
 	}
 
 	{
-		#define assert_size_equivalence(type) static_assert(sizeof(type) == sizeof(let<type>), "");
+		#define assert_size_equivalence(type) assert(sizeof(type) == sizeof(let<type>), "");
 			assert_size_equivalence(bool);
 			assert_size_equivalence(char);
 			assert_size_equivalence(short);
@@ -335,7 +335,31 @@ int main() {
     }
 
     {
-        // Output out{"./test.txt"};
-        out < "foo", "bar", "buz";
+        //Output out{"test.txt"};
+		cout < "foo", "bar", "buz";
+    }
+
+    {
+        cout.write("foo", "bar", "buz");
+        cout.puts();
+        cout.puts("foo", "bar", "buz");
+
+        cout.printf("printf called at %d\n", __LINE__);
+    }
+
+    {
+        wcout.printf(L"printf called at %d\n", __LINE__);
+    }
+
+    {
+        let f = std::ofstream{"out.txt"};
+        f.puts("f");
+        let f2 = f;
+        f2.puts("f2");
+    }
+
+    {
+        const char * buffer = "abcdef";
+        cout.write_binary(buffer, 3);
     }
 }
