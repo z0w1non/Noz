@@ -171,12 +171,12 @@ class let<ostream_tag<CharT, Traits>>
     friend class base_output<let<ostream_tag<CharT, Traits>>, CharT, Traits>;
 
 public:
-    template<typename ostream_type, typename enable_if = std::enable_if_t<!is_let_type_v<ostream_type>>>
+    template<typename ostream_type, typename enable_if = std::enable_if_t<!is_let_v<ostream_type>>>
     let(ostream_type && ostream)
         : ostream_holder{std::make_shared<ostream_holder_impl<std::decay_t<ostream_type>, as_value_tag>>(std::forward<ostream_type>(ostream))}
     {}
 
-    template<typename ostream_type, typename enable_if = std::enable_if_t<!is_let_type_v<ostream_type>>>
+    template<typename ostream_type, typename enable_if = std::enable_if_t<!is_let_v<ostream_type>>>
     let(ostream_type && ostream, as_reference_tag)
         : ostream_holder{std::make_shared<ostream_holder_impl<std::decay_t<ostream_type>, as_reference_tag>>(std::forward<ostream_type>(ostream))}
     {

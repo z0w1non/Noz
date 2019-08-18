@@ -108,11 +108,21 @@
   <ItemGroup>
     <ClInclude Include="assert.hpp" />
     <ClInclude Include="def.hpp" />
+    <ClInclude Include="generic_cast.hpp" />
     <ClInclude Include="input.hpp" />
-    <ClInclude Include="is_constexpr.hpp" />
+    <ClInclude Include="is_let.hpp" />
+    <ClInclude Include="is_shared_ptr.hpp" />
+    <ClInclude Include="let.hpp" />
+    <ClInclude Include="macro.hpp" />
+    <ClInclude Include="map.hpp" />
     <ClInclude Include="nil.hpp" />
     <ClInclude Include="Noz.hpp" />
+    <ClInclude Include="numeric.hpp" />
     <ClInclude Include="output.hpp" />
+    <ClInclude Include="primitive_type.hpp" />
+    <ClInclude Include="primitive_value.hpp" />
+    <ClInclude Include="set.hpp" />
+    <ClInclude Include="string.hpp" />
     <ClInclude Include="undef.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
