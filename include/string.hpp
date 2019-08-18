@@ -2,6 +2,8 @@
 #define STRING_HPP
 
 #include <string>
+#include <algorithm>
+#include <functional>
 #include "let.hpp"
 
 namespace Noz {
@@ -199,16 +201,78 @@ public:
     }
 
     auto left(size_type length) const
-        -> let<string_tag<CharT, Traits, Allocator> >
+        -> let
     {
         return ptr->substr(0, length);
     }
 
     auto right(size_type length) const
-        -> let<string_tag<CharT, Traits, Allocator> >
+        -> let
     {
         return ptr->substr(this->length() - length);
     }
+
+    auto to_upper_copy() const
+        -> let
+    {
+        std::basic_string<CharT, Traits, Allocator> temp = *this;
+        std::transform(temp.begin(), temp.end(), temp.begin(), std::toupper);
+        return temp;
+    }
+
+    auto to_lower_copy() const
+        -> let
+    {
+        std::basic_string<CharT, Traits, Allocator> temp = *this;
+        std::transform(temp.begin(), temp.end(), temp.begin(), std::tolower);
+        return temp;
+    }
+
+    template<typename pred_t>
+    auto trim_left_if_copy(pred_t && pred) const
+        -> let
+    {
+        auto temp = *ptr;
+        auto trim_end = std::find_if(temp.begin(), temp.end(), [&](auto && expr) { return !pred(expr); });
+        if (trim_end != temp.end()) {
+            return {trim_end, temp.end()};
+        }
+        return *this;
+    }
+
+    auto trim_left_copy() const
+        -> let
+    {
+        return trim_left_if_copy(std::isspace);
+    }
+
+    template<typename pred_t>
+    auto trim_right_if_copy(pred_t && pred) const
+        -> let
+    {
+        auto temp = *ptr;
+        auto trim_rend = std::find_if(temp.rbegin(), temp.rend(), [&](auto && expr) { return !pred(expr); });
+        if (trim_rend != temp.rend()) {
+            return {std::addressof(*temp.begin()), std::next(std::addressof(*trim_rend))};
+        }
+        return *this;
+    }
+
+    auto trim_right_copy() const
+        -> let
+    {
+        return trim_right_if_copy(std::isspace);
+    }
+
+
+#define define_nonconst_function(name) template<typename ... args_t> auto name(args_t ... args) -> void { *this = name##_copy(std::forward<args_t>(args) ...); }
+    define_nonconst_function(to_upper)
+    define_nonconst_function(to_lower)
+    define_nonconst_function(trim_left_if)
+    define_nonconst_function(trim_left)
+    define_nonconst_function(trim_right_if)
+    define_nonconst_function(trim_right)
+#undef define_nonconst_function
 
 private:
     std::shared_ptr<const std::basic_string<CharT, Traits, Allocator> > ptr;
