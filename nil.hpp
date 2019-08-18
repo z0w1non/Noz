@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DEFINED_NIL_HPP
-#define DEFINED_NIL_HPP
+#ifndef NIL_HPP
+#define NIL_HPP
 #include <optional>
 
 /**

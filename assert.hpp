@@ -1,6 +1,5 @@
-#pragma once
-#ifndef DEFINED_ASSERT_HPP
-#define DEFINED_ASSERT_HPP
+#ifndef ASSERT_HPP
+#define ASSERT_HPP
 
 #ifdef NDEBUG
 #define assert(...) (void)0

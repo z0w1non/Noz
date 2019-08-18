@@ -1,7 +1,4 @@
-#include <typeinfo>
-#include <optional>
 #include "Noz.hpp"
-#include "def.hpp"
 
 #define assert_equal(a, b) { assert(a == b); std::cout << #a << " == " << #b << std::endl; }
 
