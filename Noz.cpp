@@ -24,6 +24,8 @@ int main() {
         assert(s.iequals("ABCDEF"));
         assert(string::is_alpha{}('a'));
         assert(wstring::is_alpha{}(L'a'));
+        assert(wstring{L"abcdef"}.contains(L"cd"));
+        assert(wstring{L"abcdef"}.icontains(L"CD"));
     }
 
 	{

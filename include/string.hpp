@@ -339,25 +339,25 @@ public:
         return trim_if_copy(is_space{});
     }
 
-    auto starts_with(std::string_view string) const
+    auto starts_with(std::basic_string_view<CharT, Traits> string) const
         -> bool
     {
         return left(string.length()) == string;
     }
 
-    auto ends_with(std::string_view string) const
+    auto ends_with(std::basic_string_view<CharT, Traits> string) const
         -> bool
     {
         return right(string.length()) == string;
     }
 
-    auto contains(std::string_view string) const
+    auto contains(std::basic_string_view<CharT, Traits> string) const
         -> bool
     {
         return find(string) != -1;
     }
 
-    auto equals(std::string_view string) const
+    auto equals(std::basic_string_view<CharT, Traits> string) const
         -> bool
     {
         return *ptr == string;
