@@ -5,8 +5,11 @@
 int main() {
     use Noz;
     {
-        let s = "   a   ";
-        assert(s.trim_copy() == "a");
+        assert(string(" a ").trim_copy()       == "a");
+        assert(string("  a").trim_copy()       == "a");
+        assert(string("a  ").trim_copy()       == "a");
+        assert(string("  a").trim_left_copy()  == "a");
+        assert(string("a  ").trim_right_copy() == "a");
     }
 
     {
@@ -19,8 +22,8 @@ int main() {
         assert(s.iends_with("DEF"));
         assert(s.icontains("CD"));
         assert(s.iequals("ABCDEF"));
-        assert(Noz::string::is_alpha{}('a'));
-        assert(Noz::wstring::is_alpha{}(L'a'));
+        assert(string::is_alpha{}('a'));
+        assert(wstring::is_alpha{}(L'a'));
     }
 
 	{
