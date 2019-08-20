@@ -3,7 +3,7 @@
 #define assert_equal(a, b) { assert(a == b); std::cout << #a << " == " << #b << std::endl; }
 
 int main() {
-	use Noz;
+    use Noz;
     {
         let s = "   a   ";
         assert(s.trim_copy() == "a");
@@ -19,6 +19,8 @@ int main() {
         assert(s.iends_with("DEF"));
         assert(s.icontains("CD"));
         assert(s.iequals("ABCDEF"));
+        assert(Noz::string::is_alpha{}('a'));
+        assert(Noz::wstring::is_alpha{}(L'a'));
     }
 
 	{

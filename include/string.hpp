@@ -4,12 +4,48 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include <cstring>
+#include <cwctype>
 #include "let.hpp"
 
 namespace Noz {
 
 template<typename CharT, typename Traits = std::char_traits<CharT>, typename Allocator = std::allocator<CharT>>
 struct string_tag;
+
+#define define_character_predicate(name)  \
+    template<typename>                    \
+    struct is_##name;                     \
+    template<>                            \
+    struct is_##name<char> {              \
+        auto operator ()(char c) const    \
+            -> bool                       \
+        {                                 \
+            return std::is##name(c);      \
+        }                                 \
+    };                                    \
+    template<>                            \
+    struct is_##name<wchar_t> {           \
+        auto operator ()(wchar_t c) const \
+            -> bool                       \
+        {                                 \
+            return std::isw##name(c);     \
+        }                                 \
+    };                                    \
+// define_character_predicate
+    define_character_predicate(alnum )
+    define_character_predicate(alpha )
+    define_character_predicate(blank )
+    define_character_predicate(cntrl )
+    define_character_predicate(digit )
+    define_character_predicate(graph )
+    define_character_predicate(lower )
+    define_character_predicate(print )
+    define_character_predicate(punct )
+    define_character_predicate(space )
+    define_character_predicate(upper )
+    define_character_predicate(xdigit)
+#undef define_character_predicate
 
 template<typename CharT, typename Traits, typename Allocator>
 class let<string_tag<CharT, Traits, Allocator>> {
@@ -261,7 +297,7 @@ public:
     auto trim_left_copy() const
         -> let
     {
-        return trim_left_if_copy(std::isspace);
+        return trim_left_if_copy(is_space{});
     }
 
     template<typename pred_t>
@@ -279,7 +315,7 @@ public:
     auto trim_right_copy() const
         -> let
     {
-        return trim_right_if_copy(std::isspace);
+        return trim_right_if_copy(is_space{});
     }
 
     template<typename pred_t>
@@ -300,7 +336,7 @@ public:
     auto trim_copy() const
         -> let
     {
-        return trim_if_copy(std::isspace);
+        return trim_if_copy(is_space{});
     }
 
     auto starts_with(std::string_view string) const
@@ -366,6 +402,23 @@ public:
     define_icase_predicate_function(contains   )
     define_icase_predicate_function(equals     )
 #undef define_icase_predicate_function
+
+#define define_character_predicate(name)     \
+    using is_##name = Noz::is_##name<CharT>; \
+// define_character_predicate
+    define_character_predicate(alnum )
+    define_character_predicate(alpha )
+    define_character_predicate(blank )
+    define_character_predicate(cntrl )
+    define_character_predicate(digit )
+    define_character_predicate(graph )
+    define_character_predicate(lower )
+    define_character_predicate(print )
+    define_character_predicate(punct )
+    define_character_predicate(space )
+    define_character_predicate(upper )
+    define_character_predicate(xdigit)
+#undef define_character_predicate
 
 private:
     std::shared_ptr<const std::basic_string<CharT, Traits, Allocator> > ptr;
