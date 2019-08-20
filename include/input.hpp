@@ -20,7 +20,7 @@ public:
     }
 
     auto read_line()
-        -> Noz::BasicString<CharT, Traits>
+        -> Noz::basic_string<CharT, Traits>
     {
         std::basic_string<CharT, Traits> line;
         auto & impl = static_cast<T*>(this)->get_impl();
@@ -35,7 +35,7 @@ public:
     }
 
     auto read_all()
-        -> Noz::BasicString<CharT, Traits>
+        -> Noz::basic_string<CharT, Traits>
     {
         using iterator = std::istreambuf_iterator<CharT>;
         auto & impl = static_cast<T*>(this)->get_impl();
@@ -177,7 +177,7 @@ template<
     typename Traits = std::char_traits<CharT>,
     typename Allocator = std::allocator<CharT>
 >
-BasicInput(BasicString<CharT, Traits, Allocator>)
+BasicInput(basic_string<CharT, Traits, Allocator>)
     -> BasicInput<std::basic_ifstream<CharT, Traits> >;
 
 template<typename CharT>

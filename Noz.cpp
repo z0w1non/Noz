@@ -4,6 +4,23 @@
 
 int main() {
 	use Noz;
+    {
+        let s = "   a   ";
+        assert(s.trim_copy() == "a");
+    }
+
+    {
+        let s = "abcdef";
+        assert(s.starts_with("abc"));
+        assert(s.ends_with("def"));
+        assert(s.contains("cd"));
+        assert(s.equals("abcdef"));
+        assert(s.istarts_with("ABC"));
+        assert(s.iends_with("DEF"));
+        assert(s.icontains("CD"));
+        assert(s.iequals("ABCDEF"));
+    }
+
 	{
 		int* ptr = nil;
 		assert(ptr == nullptr);
@@ -14,12 +31,12 @@ int main() {
 	}
 
 	{
-		int a = 0, b = 0;
+		int a = 0, b = 1;
 		assert(a + b);
 	}
 
 	{
-		constexpr auto i = 0;
+        constexpr auto i = 1;
 		assert(i); // runtime assertion
 	}
 
@@ -83,7 +100,7 @@ int main() {
     }
 
     {
-        String s = "1.5";
+        Noz::string s = "1.5";
         assert(generic_cast<double>(s) == 1.5);
     }
 
@@ -95,7 +112,7 @@ int main() {
 
     {
         //Int i = 1000;
-        //String s = i;
+        //Noz::string s = i;
         //assert(s == "1000");
     }
 
@@ -224,7 +241,7 @@ int main() {
         { \
             T instance{}; \
             let<T> value = "1"; \
-            std::cout << "let<" << #T << "> is constructible from String." << std::endl; \
+            std::cout << "let<" << #T << "> is constructible from Noz::string." << std::endl; \
         } \
     //define $
     #undef $
@@ -298,20 +315,20 @@ int main() {
     }
 
     {
-        assert_equal(String{"0123456789"}.left(3), "012");
-        assert_equal(String{"0123456789"}.right(3), "789");
-        assert_equal(String{"0123456789"}.substr(4, 3), "456");
+        assert_equal(Noz::string{"0123456789"}.left(3), "012");
+        assert_equal(Noz::string{"0123456789"}.right(3), "789");
+        assert_equal(Noz::string{"0123456789"}.substr(4, 3), "456");
     }
 
     {
-        String s1{"foo"};
+        Noz::string s1{"foo"};
         std::string s2 = s1;
         assert_equal(s1, s2);
     }
 
     {
         std::string s1{"foo"};
-        String s2 = s1;
+        Noz::string s2 = s1;
         assert_equal(s1, s2);
     }
 
