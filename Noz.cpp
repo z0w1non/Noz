@@ -10,6 +10,7 @@ int main() {
         assert(string("a  ").trim_copy()       == "a");
         assert(string("  a").trim_left_copy()  == "a");
         assert(string("a  ").trim_right_copy() == "a");
+        assert(string{"_a_"}.trim_if_copy([](auto c) { return c == '_'; }) == "a");
     }
 
     {
@@ -26,6 +27,18 @@ int main() {
         assert(wstring::is_alpha{}(L'a'));
         assert(wstring{L"abcdef"}.contains(L"cd"));
         assert(wstring{L"abcdef"}.icontains(L"CD"));
+        assert(string::is_alnum {}('a'));
+        assert(string::is_alpha {}('a'));
+        assert(string::is_blank {}(' '));
+        assert(string::is_cntrl {}('\r'));
+        assert(string::is_digit {}('0'));
+        assert(string::is_graph {}('a'));
+        assert(string::is_lower {}('a'));
+        assert(string::is_print {}('a'));
+        assert(string::is_punct {}(','));
+        assert(string::is_space {}(' '));
+        assert(string::is_upper {}('A'));
+        assert(string::is_xdigit{}('a'));
     }
 
 	{
