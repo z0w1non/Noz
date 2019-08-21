@@ -75,6 +75,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -88,6 +89,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -96,6 +98,16 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Noz.cpp">
@@ -106,24 +118,24 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="assert.hpp" />
-    <ClInclude Include="def.hpp" />
-    <ClInclude Include="generic_cast.hpp" />
-    <ClInclude Include="input.hpp" />
-    <ClInclude Include="is_let.hpp" />
-    <ClInclude Include="is_shared_ptr.hpp" />
-    <ClInclude Include="let.hpp" />
-    <ClInclude Include="macro.hpp" />
-    <ClInclude Include="map.hpp" />
-    <ClInclude Include="nil.hpp" />
-    <ClInclude Include="Noz.hpp" />
-    <ClInclude Include="numeric.hpp" />
-    <ClInclude Include="output.hpp" />
-    <ClInclude Include="primitive_type.hpp" />
-    <ClInclude Include="primitive_value.hpp" />
-    <ClInclude Include="set.hpp" />
-    <ClInclude Include="string.hpp" />
-    <ClInclude Include="undef.hpp" />
+    <ClInclude Include="include\assert.hpp" />
+    <ClInclude Include="include\def.hpp" />
+    <ClInclude Include="include\generic_cast.hpp" />
+    <ClInclude Include="include\input.hpp" />
+    <ClInclude Include="include\is_let.hpp" />
+    <ClInclude Include="include\is_shared_ptr.hpp" />
+    <ClInclude Include="include\let.hpp" />
+    <ClInclude Include="include\macro.hpp" />
+    <ClInclude Include="include\map.hpp" />
+    <ClInclude Include="include\nil.hpp" />
+    <ClInclude Include="include\Noz.hpp" />
+    <ClInclude Include="include\numeric.hpp" />
+    <ClInclude Include="include\output.hpp" />
+    <ClInclude Include="include\primitive_type.hpp" />
+    <ClInclude Include="include\primitive_value.hpp" />
+    <ClInclude Include="include\set.hpp" />
+    <ClInclude Include="include\string.hpp" />
+    <ClInclude Include="include\undef.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

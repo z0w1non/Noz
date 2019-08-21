@@ -20,58 +20,58 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="input.hpp">
+    <ClInclude Include="include\output.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="nil.hpp">
+    <ClInclude Include="include\primitive_type.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Noz.hpp">
+    <ClInclude Include="include\primitive_value.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="output.hpp">
+    <ClInclude Include="include\set.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="undef.hpp">
+    <ClInclude Include="include\string.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="def.hpp">
+    <ClInclude Include="include\undef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="assert.hpp">
+    <ClInclude Include="include\assert.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="macro.hpp">
+    <ClInclude Include="include\def.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="is_shared_ptr.hpp">
+    <ClInclude Include="include\generic_cast.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="generic_cast.hpp">
+    <ClInclude Include="include\input.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="let.hpp">
+    <ClInclude Include="include\is_let.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="primitive_type.hpp">
+    <ClInclude Include="include\is_shared_ptr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="string.hpp">
+    <ClInclude Include="include\let.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="primitive_value.hpp">
+    <ClInclude Include="include\macro.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="numeric.hpp">
+    <ClInclude Include="include\map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="is_let.hpp">
+    <ClInclude Include="include\nil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="map.hpp">
+    <ClInclude Include="include\Noz.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="set.hpp">
+    <ClInclude Include="include\numeric.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
