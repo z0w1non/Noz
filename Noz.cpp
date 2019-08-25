@@ -2,8 +2,101 @@
 
 #define assert_equal(a, b) { assert(a == b); std::cout << #a << " == " << #b << std::endl; }
 
+void generate_macro_hpp() {
+    {
+        // include guard
+        auto out = std::ofstream{"./include/macro.hpp"};
+        auto argnum = 64;
+        out << "#ifndef MACRO_HPP" << std::endl;
+        out << "#define MACRO_HPP" << std::endl;
+        out << std::endl;
+
+        out << "#define $string(a) $string_i(a)" << std::endl;
+        out << "#define $string_i(a) #a" << std::endl;
+        out << "#define $wstring(a) $wstring_i(a)" << std::endl;
+        out << "#define $wstring_i(a) $wstring_ii(#a)" << std::endl;
+        out << "#define $wstring_ii(a) L ## a" << std::endl;
+        out << std::endl;
+
+        out << "#define $forward(a) $forward_i(a)" << std::endl;
+        out << "#define $forward_i(a) a" << std::endl;
+        out << std::endl;
+
+        out << "#define $cat(a, b) $cat_impl(a, b)" << std::endl;
+        out << "#define $cat_impl(a, b) a ## b" << std::endl;
+        out << "#define $variadic_size(...) $cat($variadic_size_impl(__VA_ARGS__, ";
+        for (int i = argnum - 1; i >= 0; --i) {
+            out << i;
+            //if (i)
+            out << ", ";
+        }
+        out << "),)" << std::endl;
+        out << "#define $variadic_size_impl(";
+        for (int i = 0; i < argnum - 1; ++i) {
+            out << "_" << i << ", ";
+        }
+        out << "size, ...) ";
+        out << "size" << std::endl;
+        out << std::endl;
+
+        //variadic_to_seq
+        out << "#define $variadic_to_seq(...) $cat($variadic_to_seq_, $variadic_size(__VA_ARGS__)(__VA_ARGS__),)" << std::endl;
+        //#define $variadic_to_seq_3(arg0, arg1, arg2) (arg0) (arg1) (arg2)
+        for (int i = 0; i < argnum; ++i) {
+            out << "#define $variadic_to_seq_" << i << "(";
+            for (int j = 0; j < i; ++j) {
+                out << "_" << j;
+                if (j < i - 1) {
+                    out << ", ";
+                }
+            }
+            out << ") ";
+            for (int j = 0; j < i; ++j) {
+                out << "(_" << j << ")";
+                if (j < i - 1) {
+                    out << " ";
+                }
+            }
+            out << std::endl;
+        }
+        out << std::endl;
+
+        // seq_size
+        out << "#define $seq_size(seq) $seq_size_i(seq)" << std::endl;
+        out << "#define $seq_size_i(seq) $cat($seq_size_, $seq_size_0) seq" << std::endl;
+        for (int i = 0; i < argnum; ++i) {
+            out << "#define $seq_size_" << i << "(seq) $seq_size_" << (i + 1) << std::endl;
+        }
+        for (int i = 0; i < argnum; ++i) {
+            out << "#define $seq_size_$seq_size_" << i << " " << i << std::endl;
+        }
+        out << std::endl;
+
+        // lambda
+        out << "#define $lambda(...) [=]($lambda_i($variadic_to_seq(__VA_ARGS__)))" << std::endl;
+        out << "#define $lambda_i(seq) $lambda_ii($seq_size(seq),seq)" << std::endl;
+        out << "#define $lambda_ii(size, seq) $cat($lambda_, size)seq" << std::endl;
+        for (int i = 0; i < argnum; ++i) {
+            out << "#define $lambda_" << i << "(a)";
+            if (i > 0) {
+                out << " auto a";
+            }
+            if (i > 1) {
+                out << ", $lambda_" << (i - 1);
+            }
+            out << std::endl;
+        }
+        out << std::endl;
+
+        out << "#endif" << std::endl;
+    }
+}
+
 int main() {
-    use Noz;
+    using namespace Noz;
+
+    generate_macro_hpp();
+
     {
         assert(string(" a ").trim_copy()       == "a");
         assert(string("  a").trim_copy()       == "a");
