@@ -28,6 +28,7 @@
 #include "output.hpp"
 #include "map.hpp"
 #include "set.hpp"
+#include "macro.hpp"
 #include "def.hpp"
 
 #endif //NOZ_HPP
