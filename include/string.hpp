@@ -47,6 +47,30 @@ struct string_tag;
     define_character_predicate(xdigit)
 #undef define_character_predicate
 
+#define define_character_case_unary_operator(case) \
+template<typename>                                 \
+struct to_##case;                                  \
+template<>                                         \
+struct to_##case<char> {                           \
+    auto operator()(char c) const                  \
+        -> char                                    \
+    {                                              \
+        return std::to##case(c);                   \
+    }                                              \
+};                                                 \
+template<>                                         \
+struct to_##case<wchar_t> {                        \
+    auto operator()(wchar_t c) const               \
+        -> wchar_t                                 \
+    {                                              \
+        return std::tow##case(c);                  \
+    }                                              \
+};                                                 \
+// define define_character_case_unary_operator
+    define_character_case_unary_operator(upper)
+    define_character_case_unary_operator(lower)
+#undef define_character_case_unary_operator
+
 template<typename CharT, typename Traits, typename Allocator>
 class let<string_tag<CharT, Traits, Allocator>> {
     friend get_primitive_value_impl<let<string_tag<CharT, Traits, Allocator>>>;
@@ -270,7 +294,7 @@ public:
         -> let
     {
         primitive_type temp = *this;
-        std::transform(temp.begin(), temp.end(), temp.begin(), std::toupper);
+        std::transform(temp.begin(), temp.end(), temp.begin(), Noz::to_upper<CharT>{});
         return temp;
     }
 
@@ -278,7 +302,7 @@ public:
         -> let
     {
         primitive_type temp = *this;
-        std::transform(temp.begin(), temp.end(), temp.begin(), std::tolower);
+        std::transform(temp.begin(), temp.end(), temp.begin(), Noz::to_lower<CharT>{});
         return temp;
     }
 

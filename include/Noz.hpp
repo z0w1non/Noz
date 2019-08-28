@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "assert.hpp"
+//#include "assert.hpp"
 #include "nil.hpp"
 #include "let.hpp"
 #include "is_let.hpp"
