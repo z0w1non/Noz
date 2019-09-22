@@ -130,8 +130,30 @@ BOOST_AUTO_TEST_CASE(generic_cast_as_static_pointer_cast)
     BOOST_CHECK(Noz::generic_cast<std::shared_ptr<derived>>(std::make_shared<derived>())->value == 1);
 }
 
-BOOST_AUTO_TEST_CASE(left_right_substr){
+BOOST_AUTO_TEST_CASE(left_right_substr)
+{
     BOOST_CHECK_EQUAL(Noz::string{"0123456789"}.left(3), "012");
     BOOST_CHECK_EQUAL(Noz::string{"0123456789"}.right(3), "789");
     BOOST_CHECK_EQUAL(Noz::string{"0123456789"}.substr(4, 3), "456");
+}
+
+BOOST_AUTO_TEST_CASE(fixed_string_default_construct)
+{
+	Noz::fixed_string<10> s{};
+}
+
+BOOST_AUTO_TEST_CASE(fixed_string_construct_from_std_string)
+{
+	BOOST_CHECK((Noz::fixed_string<4>{std::string{"abc"}} == "abc"));
+	BOOST_CHECK((Noz::fixed_string<4>{std::string{"abc"}, 1, 1} == "b"));
+	BOOST_CHECK((Noz::fixed_string<4>{std::string_view{"abc"}, 1, 1} == "b"));
+	BOOST_CHECK((Noz::fixed_string<4>{std::string_view{"abc"}, 1, 1} == "b"));
+}
+
+BOOST_AUTO_TEST_CASE(fixed_string_compare)
+{
+	BOOST_CHECK(Noz::fixed_string<4>{"abc"} == "abc");
+	BOOST_CHECK(Noz::fixed_string<4>{"abcdef"} == "abc");
+	BOOST_CHECK(Noz::fixed_string<1>{""} == "");
+	BOOST_CHECK(Noz::fixed_string<1>{""}.empty());
 }
