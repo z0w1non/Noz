@@ -24,6 +24,7 @@
 #include "primitive_value.hpp"
 #include "numeric.hpp"
 #include "string.hpp"
+#include "fixed_string.hpp"
 #include "input.hpp"
 #include "output.hpp"
 #include "map.hpp"
