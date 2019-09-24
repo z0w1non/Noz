@@ -29,6 +29,7 @@
 #include "output.hpp"
 #include "map.hpp"
 #include "set.hpp"
+#include "task.hpp"
 #include "macro.hpp"
 #include "def.hpp"
 

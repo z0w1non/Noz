@@ -157,3 +157,35 @@ BOOST_AUTO_TEST_CASE(fixed_string_compare)
     BOOST_CHECK(Noz::fixed_string<1>{""} == "");
     BOOST_CHECK(Noz::fixed_string<1>{""}.empty());
 }
+
+BOOST_AUTO_TEST_CASE(create_object)
+{
+    class my_object
+        : public Noz::object
+    {
+    public:
+        virtual ~my_object() {}
+
+        my_object()
+        {}
+
+        void on_create() override
+        {
+            object::on_create();
+            attach<my_object>();
+        }
+
+        void update() override
+        {
+        }
+
+        void draw() override
+        {
+        }
+    };
+
+    auto ptr = Noz::task::create<my_object>();
+    Noz::task::for_each<Noz::object>([](auto && obj){
+            obj.update();
+    });
+}
